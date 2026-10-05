@@ -14,8 +14,6 @@ dependencies {
     implementation 'io.quarkus:quarkus-rest-jackson'
     implementation 'io.quarkus:quarkus-rest-client-jackson'
     implementation "io.littlehorse:littlehorse-quarkus:${lhVersion}"
-    testImplementation 'io.quarkus:quarkus-junit'
-    testImplementation 'io.rest-assured:rest-assured'
 }
 
 group = 'io.littlehorse'
@@ -31,6 +29,3 @@ compileJava {
     options.compilerArgs << '-parameters'
 }
 
-compileTestJava {
-    options.encoding = 'UTF-8'
-}
