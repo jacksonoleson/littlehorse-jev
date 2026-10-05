@@ -18,7 +18,7 @@ import java.util.Map;
  * stores as a variable and branches on directly. Every decision exists once per engine.
  */
 @LHTask
-public class PackageClaimDecisions {
+public class PackageClaimDecisionWorker {
 
     public static final String CLASSIFY_CLAIM = "classify-claim-";
     public static final String ASSESS_TRACKING = "assess-tracking-";
@@ -27,7 +27,7 @@ public class PackageClaimDecisions {
 
     private final DecisionModels models;
 
-    public PackageClaimDecisions(DecisionModels models) {
+    public PackageClaimDecisionWorker(DecisionModels models) {
         this.models = models;
     }
 

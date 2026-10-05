@@ -18,7 +18,7 @@ import org.jboss.logging.Logger;
 
 /** Deterministic steps of the package-claim workflow: lookups, outside-service calls, and actions. */
 @LHTask
-public class PackageClaimTasks {
+public class PackageClaimWorker {
 
     public static final String FIND_CLAIMED_ORDER = "find-claimed-order";
     public static final String FETCH_TRACKING = "fetch-tracking";
@@ -32,14 +32,14 @@ public class PackageClaimTasks {
     /** ExternalEventDef the helpdesk posts when an agent finishes the review. */
     public static final String CLAIM_REVIEW_COMPLETED = "claim-review-completed";
 
-    private static final Logger LOG = Logger.getLogger(PackageClaimTasks.class);
+    private static final Logger LOG = Logger.getLogger(PackageClaimWorker.class);
     private static final Pattern ORDER_ID = Pattern.compile("\\bORD-\\d+\\b");
 
     private final OrderStore orders;
     private final CarrierClient carrier;
     private final HelpdeskClient helpdesk;
 
-    public PackageClaimTasks(
+    public PackageClaimWorker(
             OrderStore orders, @RestClient CarrierClient carrier, @RestClient HelpdeskClient helpdesk) {
         this.orders = orders;
         this.carrier = carrier;

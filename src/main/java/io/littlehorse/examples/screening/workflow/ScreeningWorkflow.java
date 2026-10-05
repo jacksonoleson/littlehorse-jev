@@ -1,9 +1,9 @@
 package io.littlehorse.examples.screening.workflow;
 
 import static io.littlehorse.examples.screening.policy.ScreeningPolicy.*;
-import static io.littlehorse.examples.screening.tasks.JevRecruiter.COMPLETE_RECRUITER_REVIEW;
-import static io.littlehorse.examples.screening.tasks.ScreeningDecisions.*;
-import static io.littlehorse.examples.screening.tasks.ScreeningTasks.*;
+import static io.littlehorse.examples.screening.tasks.RecruiterDecisionWorker.COMPLETE_RECRUITER_REVIEW;
+import static io.littlehorse.examples.screening.tasks.ScreeningDecisionWorker.*;
+import static io.littlehorse.examples.screening.tasks.ScreeningWorker.*;
 import static io.littlehorse.examples.screening.workflow.RecruiterReviewForm.RECRUITER_REVIEW;
 import static io.littlehorse.shared.models.DecisionModels.JEV;
 import static io.littlehorse.shared.models.DecisionModels.OPENAI;

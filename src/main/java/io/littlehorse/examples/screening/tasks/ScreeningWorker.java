@@ -13,7 +13,7 @@ import org.jboss.logging.Logger;
 
 /** Deterministic steps of candidate screening: ATS and verification lookups, scoring math, and actions. */
 @LHTask
-public class ScreeningTasks {
+public class ScreeningWorker {
 
     public static final String FETCH_APPLICATION = "fetch-application";
     public static final String FETCH_ROLE = "fetch-role";
@@ -22,7 +22,7 @@ public class ScreeningTasks {
     public static final String SCHEDULE_INTERVIEW = "schedule-interview";
     public static final String CLOSE_APPLICATION = "close-application";
 
-    private static final Logger LOG = Logger.getLogger(ScreeningTasks.class);
+    private static final Logger LOG = Logger.getLogger(ScreeningWorker.class);
 
     /** Blind screening: the models never see the candidate's name or contact details. */
     @LHTaskMethod(FETCH_APPLICATION)

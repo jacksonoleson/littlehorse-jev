@@ -22,7 +22,7 @@ import java.util.Map;
  * verification report).
  */
 @LHTask
-public class ScreeningDecisions {
+public class ScreeningDecisionWorker {
 
     public static final String TRIAGE_APPLICATION = "triage-application-";
     public static final String CHECK_REQUIREMENTS = "check-requirements-";
@@ -31,7 +31,7 @@ public class ScreeningDecisions {
 
     private final DecisionModels models;
 
-    public ScreeningDecisions(DecisionModels models) {
+    public ScreeningDecisionWorker(DecisionModels models) {
         this.models = models;
     }
 

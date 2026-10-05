@@ -2,8 +2,8 @@ package io.littlehorse.examples.support_ticket.workflow;
 
 import static io.littlehorse.examples.support_ticket.policy.SupportTicketPolicy.MAX_MANIPULATION;
 import static io.littlehorse.examples.support_ticket.policy.SupportTicketPolicy.MIN_CONFIDENCE;
-import static io.littlehorse.examples.support_ticket.tasks.SupportTicketDecisions.TRIAGE_TICKET;
-import static io.littlehorse.examples.support_ticket.tasks.SupportTicketTasks.*;
+import static io.littlehorse.examples.support_ticket.tasks.SupportTicketDecisionWorker.TRIAGE_TICKET;
+import static io.littlehorse.examples.support_ticket.tasks.SupportTicketWorker.*;
 import static io.littlehorse.shared.models.DecisionModels.JEV;
 import static io.littlehorse.shared.models.DecisionModels.OPENAI;
 

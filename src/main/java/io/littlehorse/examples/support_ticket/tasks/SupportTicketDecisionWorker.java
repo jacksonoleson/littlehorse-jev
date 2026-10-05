@@ -19,7 +19,7 @@ import java.util.Map;
  * flat JSON object; the WfSpec applies the confidence and manipulation gates and takes the action.
  */
 @LHTask
-public class SupportTicketDecisions {
+public class SupportTicketDecisionWorker {
 
     public static final String TRIAGE_TICKET = "triage-ticket-";
     public static final String PICK_WORKFLOW = "pick-workflow-";
@@ -27,7 +27,7 @@ public class SupportTicketDecisions {
     private final DecisionModels models;
     private final OrderStore orders;
 
-    public SupportTicketDecisions(DecisionModels models, OrderStore orders) {
+    public SupportTicketDecisionWorker(DecisionModels models, OrderStore orders) {
         this.models = models;
         this.orders = orders;
     }

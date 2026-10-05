@@ -27,7 +27,7 @@ import java.util.TreeMap;
  * and completes the user task through the same API a recruiter's UI would use.
  */
 @LHTask
-public class JevRecruiter {
+public class RecruiterDecisionWorker {
 
     public static final String COMPLETE_RECRUITER_REVIEW = "complete-recruiter-review";
     public static final String REVIEWER = "jev-recruiter";
@@ -36,7 +36,7 @@ public class JevRecruiter {
     private final LittleHorseBlockingStub lh;
     private final ObjectMapper json;
 
-    public JevRecruiter(DecisionModels models, LittleHorseBlockingStub lh, ObjectMapper json) {
+    public RecruiterDecisionWorker(DecisionModels models, LittleHorseBlockingStub lh, ObjectMapper json) {
         this.models = models;
         this.lh = lh;
         this.json = json;

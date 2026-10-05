@@ -1,8 +1,8 @@
 package io.littlehorse.examples.package_claim.workflow;
 
 import static io.littlehorse.examples.package_claim.policy.PackageClaimPolicy.*;
-import static io.littlehorse.examples.package_claim.tasks.PackageClaimDecisions.*;
-import static io.littlehorse.examples.package_claim.tasks.PackageClaimTasks.*;
+import static io.littlehorse.examples.package_claim.tasks.PackageClaimDecisionWorker.*;
+import static io.littlehorse.examples.package_claim.tasks.PackageClaimWorker.*;
 import static io.littlehorse.shared.models.DecisionModels.JEV;
 import static io.littlehorse.shared.models.DecisionModels.OPENAI;
 

@@ -16,7 +16,7 @@ import org.jboss.logging.Logger;
 
 /** Deterministic tasks that validate input and perform privileged actions. No AI involved here. */
 @LHTask
-public class SupportTicketTasks {
+public class SupportTicketWorker {
 
     public static final String EXTRACT_ORDER_ID = "extract-order-id";
     public static final String VALIDATE_ORDER_AND_USER = "validate-order-and-user";
@@ -29,13 +29,13 @@ public class SupportTicketTasks {
     /** ExternalEventDef the helpdesk posts when an agent resolves the case. */
     public static final String SUPPORT_CASE_RESOLVED = "support-case-resolved";
 
-    private static final Logger LOG = Logger.getLogger(SupportTicketTasks.class);
+    private static final Logger LOG = Logger.getLogger(SupportTicketWorker.class);
     private static final Pattern ORDER_ID = Pattern.compile("\\bORD-\\d+\\b");
 
     private final OrderStore orders;
     private final HelpdeskClient helpdesk;
 
-    public SupportTicketTasks(OrderStore orders, @RestClient HelpdeskClient helpdesk) {
+    public SupportTicketWorker(OrderStore orders, @RestClient HelpdeskClient helpdesk) {
         this.orders = orders;
         this.helpdesk = helpdesk;
     }
