@@ -98,6 +98,11 @@ Raw runs: `/tmp/exp/{jev5,luna5,terra5}.jsonl`; analysis: `/tmp/exp/analysis5.tx
 
 Result: on two separate restarts, all 6 seeded claims matched (dave: DENY at 1.0 both times). Alice's probabilities moved by 0.01, and so did 6 identical requests sent back to back. That is Jev's own small variation, not request order.
 
+**Re-checked later on 10-05 (same `jev-1.13.0`):** the replay gives the same results.
+- With the bare index, the order decides the answer: RESHIP 113/120 with `customer_risk` first.
+- With a label, it's DENY 120/120 either way.
+- **Sorting alone would have locked in the wrong answer.** Sorted keys put `customer_risk` first. The exact request the app sends today, with the bare index, gives RESHIP 5/5 (DENY probability ~0.3). The label is what fixes it: DENY 5/5 at ~0.97.
+
 ---
 
 ## Caveats
