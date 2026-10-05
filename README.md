@@ -106,15 +106,16 @@ Method, raw numbers and caveats are in [EXPERIMENTS.md](EXPERIMENTS.md).
 
 | | Jev (`jev-1.13`) | `gpt-5.6-luna` (low) | `gpt-5.6-terra` (medium) |
 |---|---|---|---|
-| One model call, median | **~110 ms** | ~1.9 s | ~1.6 s |
-| 4-call workflow, model time (range) | **0.4–1.2 s** | 6.2–12.0 s | 5.3–11.5 s |
-| Matched expected outcome (36 runs) | 34 | 32 | **35** |
-| Model chose "cancel" on an injection | **0/6** | 2/6 | 2/6 |
-| Self-contradicting tracking answers | **0/10** | 3/10 | 1/10 |
-| Confidence on final decisions | 0.58–1.0; low when wrong, gate caught it | 0.98–0.99, even when wrong | 0.93–0.99 |
+| One model call, median | **~150 ms** | ~1.9 s | ~1.4 s |
+| 4-call workflow, model time (range) | **0.5–1.0 s** | 6.2–9.7 s | 4.7–8.6 s |
+| Matched expected outcome (32 runs) | **32** | 30 | **32** |
+| Model chose "cancel" on an injection | **0/6** | 6/6 | 3/6 |
+| Self-contradicting tracking answers | **0/10** | 1/10 | **0/10** |
+
+Numbers are from the latest run, experiment 5. Experiment 4 also showed Jev's confidence dropping when it was wrong while OpenAI stayed at 0.93 or higher; see [EXPERIMENTS.md](EXPERIMENTS.md).
 
 Highlights:
-- **Prompt injection:** both OpenAI models sometimes chose to cancel the order; only the check in code stopped it. Jev escalated on its own.
+- **Prompt injection:** both OpenAI models often chose to cancel the order; only the manipulation check in the WfSpec stopped it. Jev escalated on its own every time.
 - **Self-contradiction:** both OpenAI models sometimes said "delivered at the address" *and* "wrong location" at 0.99. Terra did it on a package that was never delivered.
 - **Key order flipped a Jev decision:** a bare Score index passed to the next call was ambiguous. Pass labels, not indices.
 - **Switch the OpenAI twin to another model** without code changes: `OPENAI_MODEL=gpt-5.6-terra OPENAI_REASONING_EFFORT=medium ./gradlew quarkusDev`.
