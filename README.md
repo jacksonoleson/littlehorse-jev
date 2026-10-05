@@ -119,6 +119,25 @@ Highlights:
 - **Key order flipped a Jev decision:** a bare Score index passed to the next call was ambiguous. Pass labels, not indices.
 - **Switch the OpenAI twin to another model** without code changes: `OPENAI_MODEL=gpt-5.6-terra OPENAI_REASONING_EFFORT=medium ./gradlew quarkusDev`.
 
+### How the OpenAI twin gets structured output
+
+[`OpenAiModel`](src/main/java/io/littlehorse/common/llm/OpenAiModel.java) answers the same policy questions as Jev, using OpenAI's strict JSON-schema output (`response_format: json_schema`, `strict: true`):
+
+1. **Each question becomes a required schema field, typed by question type.**
+   - Choice → `{choice: enum[option keys], confidence}`
+   - Noul → `{noul}`
+   - Score → `{score: integer, confidence}`
+
+   The enum means OpenAI can only answer with one of the policy's option keys, the same allowlist Jev gives.
+2. **The reply is mapped into the shared `ModelResponse`.** Decision workers, `jsonPath` branches and gates are identical for both engines.
+
+What strict mode does **not** give you:
+- **Calibrated confidence.** OpenAI's confidence is self-reported. It stayed at 0.93 or above, so confidence gates rarely fire for it.
+- **Probabilities or fractional scores.** `probabilities` is left out, and Score is a whole-number index.
+- **Range checks.** Values meant to be 0–1 aren't enforced.
+- **Correct answers.** The answer always has the right shape, but it can still contradict itself. The contradiction check in the WfSpec exists for this.
+- **Special handling of refusals.** A refusal or empty reply fails to parse, so the task fails and `withRetries(2)` tries again.
+
 ## Run it
 
 ```shell script
