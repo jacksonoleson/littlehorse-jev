@@ -138,6 +138,14 @@ What strict mode does **not** give you:
 - **Correct answers.** The answer always has the right shape, but it can still contradict itself. The contradiction check in the WfSpec exists for this.
 - **Special handling of refusals.** A refusal or empty reply fails to parse, so the task fails and `withRetries(2)` tries again.
 
+**Option: LittleHorse Structs.** Decision tasks here return a `Map`, which LittleHorse stores as `JSON_OBJ`, so nothing checks the answer's shape once it leaves the worker. With Structs:
+- A decision task returns an `@LHStructDef` class instead of a `Map`, e.g. `ClaimResolution { decision, confidence }`.
+- The WfSpec declares the variable with `wf.declareStruct("resolution", ClaimResolution.class)`.
+- lh-quarkus registers the StructDef, and LittleHorse type-checks every answer against it, from either engine.
+- The answer's schema then lives in one place, in LittleHorse as well as in the worker.
+
+This demo doesn't use Structs yet.
+
 ## Run it
 
 ```shell script
