@@ -1,7 +1,7 @@
 package io.littlehorse.examples.package_claim.tasks;
 
 import io.littlehorse.examples.package_claim.infra.CarrierClient;
-import io.littlehorse.examples.package_claim.infra.CrmClient;
+import io.littlehorse.examples.package_claim.infra.Crm;
 import io.littlehorse.quarkus.task.LHTask;
 import io.littlehorse.sdk.common.LHLibUtil;
 import io.littlehorse.sdk.worker.LHTaskMethod;
@@ -37,17 +37,12 @@ public class PackageClaimTasks {
 
     private final OrderStore orders;
     private final CarrierClient carrier;
-    private final CrmClient crm;
     private final HelpdeskClient helpdesk;
 
     public PackageClaimTasks(
-            OrderStore orders,
-            @RestClient CarrierClient carrier,
-            @RestClient CrmClient crm,
-            @RestClient HelpdeskClient helpdesk) {
+            OrderStore orders, @RestClient CarrierClient carrier, @RestClient HelpdeskClient helpdesk) {
         this.orders = orders;
         this.carrier = carrier;
-        this.crm = crm;
         this.helpdesk = helpdesk;
     }
 
@@ -81,7 +76,7 @@ public class PackageClaimTasks {
 
     @LHTaskMethod(FETCH_CLAIM_HISTORY)
     public Map<String, Object> fetchClaimHistory(String userId) {
-        return crm.claims(userId);
+        return Crm.claims(userId);
     }
 
     @LHTaskMethod(NOTIFY_IN_TRANSIT)

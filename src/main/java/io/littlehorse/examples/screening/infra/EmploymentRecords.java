@@ -1,14 +1,12 @@
 package io.littlehorse.examples.screening.infra;
 
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
 import java.util.List;
 import java.util.Map;
 
 /** Employment-verification vendor: what past employers actually have on record. */
-@Path("/verify")
-public class VerificationResource {
+public final class EmploymentRecords {
+
+    private EmploymentRecords() {}
 
     private static final Map<String, List<Map<String, String>>> RECORDS = Map.of(
             "APP-101", List.of(
@@ -23,9 +21,7 @@ public class VerificationResource {
             "APP-106", List.of(record("Spotify", "Data Engineer", "2019-04", "present")),
             "APP-107", List.of(record("First Regional Bank", "ETL Developer", "2017-02", "present")));
 
-    @GET
-    @Path("/employment/{applicationId}")
-    public Map<String, Object> employment(@PathParam("applicationId") String applicationId) {
+    public static Map<String, Object> verify(String applicationId) {
         List<Map<String, String>> records = RECORDS.get(applicationId);
         return records == null
                 ? Map.of("status", "NO_RECORDS", "records", List.of())

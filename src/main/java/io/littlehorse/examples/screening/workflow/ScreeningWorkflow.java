@@ -1,6 +1,7 @@
 package io.littlehorse.examples.screening.workflow;
 
 import static io.littlehorse.examples.screening.policy.ScreeningPolicy.*;
+import static io.littlehorse.examples.screening.tasks.JevRecruiter.COMPLETE_RECRUITER_REVIEW;
 import static io.littlehorse.examples.screening.tasks.ScreeningDecisions.*;
 import static io.littlehorse.examples.screening.tasks.ScreeningTasks.*;
 import static io.littlehorse.examples.screening.workflow.RecruiterReviewForm.RECRUITER_REVIEW;
@@ -134,8 +135,8 @@ public class ScreeningWorkflow {
             WorkflowThread thread, WfRunVariable outcome, WfRunVariable review, String reason) {
         outcome.assign("RECRUITER_REVIEW");
         UserTaskOutput task = thread.assignUserTask(RECRUITER_REVIEW, null, "recruiting").withNotes(reason);
-        // The user task triggers its own hand-off; the recruiting tool (a Jev "recruiter") completes it.
-        thread.scheduleReminderTask(task, 0, REQUEST_RECRUITER_REVIEW);
+        // The user task triggers its own reviewer: Jev, acting as the recruiter, completes it.
+        thread.scheduleReminderTask(task, 0, COMPLETE_RECRUITER_REVIEW);
         review.assign(task);
     }
 }

@@ -1,9 +1,11 @@
-package io.littlehorse.examples.screening.infra;
+package io.littlehorse.examples.screening.tasks;
 
 import static io.littlehorse.examples.screening.policy.ScreeningPolicy.RECRUITER_REVIEW_QUESTIONS;
+import static io.littlehorse.shared.models.DecisionModels.JEV;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.littlehorse.quarkus.task.LHTask;
 import io.littlehorse.sdk.common.LHLibUtil;
 import io.littlehorse.sdk.common.proto.CompleteUserTaskRunRequest;
 import io.littlehorse.sdk.common.proto.ListVariablesRequest;
@@ -12,51 +14,42 @@ import io.littlehorse.sdk.common.proto.UserTaskRun;
 import io.littlehorse.sdk.common.proto.UserTaskRunId;
 import io.littlehorse.sdk.common.proto.Variable;
 import io.littlehorse.sdk.common.proto.VariableValue;
-import io.littlehorse.sdk.common.proto.WfRunId;
-import io.littlehorse.shared.jev.JevModel;
+import io.littlehorse.sdk.worker.LHTaskMethod;
+import io.littlehorse.sdk.worker.WorkerContext;
+import io.littlehorse.shared.models.DecisionModels;
 import io.littlehorse.shared.models.ModelResponse;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import org.jboss.logging.Logger;
 
 /**
- * Recruiting tool, served by this app, whose "recruiter" is Jev. It reads the WfRun's state, decides,
- * and completes the recruiter-review user task through the same API a recruiter's UI would use.
+ * Jev as the recruiter. Triggered by the recruiter-review user task itself: reads the WfRun's state, decides,
+ * and completes the user task through the same API a recruiter's UI would use.
  */
-@Path("/recruiting")
-public class RecruitingToolResource {
+@LHTask
+public class JevRecruiter {
 
+    public static final String COMPLETE_RECRUITER_REVIEW = "complete-recruiter-review";
     public static final String REVIEWER = "jev-recruiter";
 
-    private static final Logger LOG = Logger.getLogger(RecruitingToolResource.class);
-
+    private final DecisionModels models;
     private final LittleHorseBlockingStub lh;
-    private final JevModel jev;
     private final ObjectMapper json;
 
-    public RecruitingToolResource(LittleHorseBlockingStub lh, JevModel jev, ObjectMapper json) {
+    public JevRecruiter(DecisionModels models, LittleHorseBlockingStub lh, ObjectMapper json) {
+        this.models = models;
         this.lh = lh;
-        this.jev = jev;
         this.json = json;
     }
 
-    @POST
-    @Path("/reviews")
-    public Map<String, Object> requestReview(RecruitingToolClient.ReviewRequest request)
-            throws JsonProcessingException {
-        WfRunId wfRunId = LHLibUtil.wfRunIdFromString(request.wfRunId());
-        UserTaskRunId taskId = UserTaskRunId.newBuilder()
-                .setWfRunId(wfRunId)
-                .setUserTaskGuid(request.userTaskGuid())
-                .build();
+    @LHTaskMethod(COMPLETE_RECRUITER_REVIEW)
+    public Map<String, Object> completeRecruiterReview(WorkerContext ctx) throws Exception {
+        // A reminder task's node run is the user task node that scheduled it.
+        UserTaskRunId taskId = lh.getNodeRun(ctx.getNodeRunId()).getUserTask().getUserTaskRunId();
         UserTaskRun task = lh.getUserTaskRun(taskId);
 
-        // Sorted keys keep the request identical across restarts (see EXPERIMENTS.md #3).
         Map<String, Object> state = new TreeMap<>();
-        for (Variable v : lh.listVariables(ListVariablesRequest.newBuilder().setWfRunId(wfRunId).build())
+        for (Variable v : lh.listVariables(ListVariablesRequest.newBuilder().setWfRunId(taskId.getWfRunId()).build())
                 .getResultsList()) {
             Object value = toJava(v.getValue());
             if (value != null) {
@@ -65,8 +58,7 @@ public class RecruitingToolResource {
         }
         state.put("review_reason", task.getNotes());
 
-        // Jev completes the userTask
-        ModelResponse r = jev.ask(state, RECRUITER_REVIEW_QUESTIONS);
+        ModelResponse r = models.ask(JEV, ctx, state, RECRUITER_REVIEW_QUESTIONS);
         ModelResponse.Answer decision = r.get("decision");
         String notes = "%s chose %s (confidence %.2f, probabilities %s)"
                 .formatted(r.model(), decision.choice(), decision.confidence(), decision.probabilities());
@@ -77,7 +69,6 @@ public class RecruitingToolResource {
                 .putResults("decision", LHLibUtil.objToVarVal(decision.choice()))
                 .putResults("notes", LHLibUtil.objToVarVal(notes))
                 .build());
-        LOG.infof("Recruiter review %s | reason: %s | %s", request.wfRunId(), task.getNotes(), notes);
         return Map.of("reviewer", REVIEWER, "decision", decision.choice(), "confidence", decision.confidence());
     }
 

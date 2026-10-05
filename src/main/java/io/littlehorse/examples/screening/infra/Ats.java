@@ -1,15 +1,12 @@
 package io.littlehorse.examples.screening.infra;
 
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.NotFoundException;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
 import java.util.List;
 import java.util.Map;
 
 /** Applicant tracking system: job applications (with PII) and open roles. */
-@Path("/ats")
-public class AtsResource {
+public final class Ats {
+
+    private Ats() {}
 
     private static final Map<String, Map<String, Object>> APPLICATIONS = Map.of(
             "APP-101", application("APP-101", "Priya Raman", "priya@example.com",
@@ -97,22 +94,18 @@ public class AtsResource {
                     Map.of("language_depth", 0.25, "system_design", 0.20, "team_leadership", 0.05,
                             "data_engineering", 0.45, "generalist", 0.05)));
 
-    @GET
-    @Path("/applications/{applicationId}")
-    public Map<String, Object> application(@PathParam("applicationId") String applicationId) {
+    public static Map<String, Object> application(String applicationId) {
         Map<String, Object> application = APPLICATIONS.get(applicationId);
         if (application == null) {
-            throw new NotFoundException();
+            throw new IllegalArgumentException("No application " + applicationId);
         }
         return application;
     }
 
-    @GET
-    @Path("/roles/{track}")
-    public Map<String, Object> role(@PathParam("track") String track) {
+    public static Map<String, Object> role(String track) {
         Map<String, Object> role = ROLES.get(track);
         if (role == null) {
-            throw new NotFoundException();
+            throw new IllegalArgumentException("No open role for track " + track);
         }
         return role;
     }

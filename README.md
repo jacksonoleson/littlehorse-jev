@@ -82,8 +82,8 @@ valid.doIf(claim.jsonPath("$.confidence").isLessThan(MIN_CLAIM_CONFIDENCE), t ->
 |---|---|---|
 | `handle-support-ticket-{jev,openai}` | Support email → cancel and refund / send order info / escalate | 1 |
 | `dispatch-support-ticket` | Same tickets, but Jev picks a child workflow: `refund-order`, `send-order-status`, `issue-return-label`, `escalate-to-helpdesk` | 1 |
-| `package-claim-{jev,openai}` | "Where's my package?", using carrier and CRM APIs | up to 4 |
-| `screen-candidate-{jev,openai}` | Resume screening with name and email removed, using ATS and employment-verification APIs; uses all 3 question types | up to 4 |
+| `package-claim-{jev,openai}` | "Where's my package?", using a carrier API (HTTP) and CRM data | up to 4 |
+| `screen-candidate-{jev,openai}` | Resume screening with name and email removed, using ATS and employment-verification data; uses all 3 question types; Jev completes the recruiter-review user task | up to 4 |
 
 **Package claim** (`package-claim-*`)
 1. **Classify the claim** (Choice): missing package / damaged or wrong item (emails a return label) / other.
@@ -125,7 +125,7 @@ Highlights:
 docker run --name littlehorse -d -p 2023:2023 -p 8080:8080 \
   ghcr.io/littlehorse-enterprises/littlehorse/lh-standalone:latest
 # .env (or export): TYPESAFE_API_KEY=...  OPENAI_API_KEY=...
-./gradlew quarkusDev        # registers the WfSpecs, runs the task workers and the outside services (all simulated in-app) · dashboard on :8080
+./gradlew quarkusDev        # registers the WfSpecs, runs the task workers and two HTTP services (carrier, helpdesk) · dashboard on :8080
 ```
 
 Start any workflow with `lhctl run <wfSpec> <var> <value> ...`. Swap `-jev` for `-openai` to run the OpenAI twin.

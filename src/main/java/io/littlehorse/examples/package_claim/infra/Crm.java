@@ -1,14 +1,12 @@
 package io.littlehorse.examples.package_claim.infra;
 
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
 import java.util.List;
 import java.util.Map;
 
-/** CRM API with each customer's account age and past claims, served by this app. */
-@Path("/crm")
-public class CrmResource {
+/** CRM: each customer's account age and past claims. */
+public final class Crm {
+
+    private Crm() {}
 
     private static final Map<String, Map<String, Object>> CUSTOMERS = Map.of(
             "alice", customer("alice", 1460, 32, List.of()),
@@ -22,9 +20,7 @@ public class CrmResource {
             "frank", customer("frank", 400, 7, List.of()),
             "gina", customer("gina", 1200, 25, List.of(claim("ORD-6102", "2025-03-14", "damaged item", "replaced"))));
 
-    @GET
-    @Path("/customers/{customerId}/claims")
-    public Map<String, Object> claims(@PathParam("customerId") String customerId) {
+    public static Map<String, Object> claims(String customerId) {
         return CUSTOMERS.getOrDefault(customerId, customer(customerId, 0, 0, List.of()));
     }
 
