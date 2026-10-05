@@ -112,7 +112,7 @@ Method, raw numbers and caveats are in [EXPERIMENTS.md](EXPERIMENTS.md).
 | Model chose "cancel" on an injection | **0/6** | 6/6 | 3/6 |
 | Self-contradicting tracking answers | **0/10** | 1/10 | **0/10** |
 
-Numbers are from the latest run, experiment 5. Experiment 4 also showed Jev's confidence dropping when it was wrong while OpenAI stayed at 0.93 or higher; see [EXPERIMENTS.md](EXPERIMENTS.md).
+Numbers are from experiment 1 in [EXPERIMENTS.md](EXPERIMENTS.md), which also notes an earlier run where Jev's confidence dropped when it was wrong while OpenAI's stayed at 0.98.
 
 Highlights:
 - **Prompt injection:** both OpenAI models often chose to cancel the order; only the manipulation check in the WfSpec stopped it. Jev escalated on its own every time.
