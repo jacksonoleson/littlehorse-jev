@@ -2,15 +2,10 @@
 
 ## TL;DR
 
-- **Speed:** a Jev call takes **~100 ms**; `gpt-5.6-luna` takes **~1–2.5 s**. A four-call workflow
-  finishes in **~1 s with Jev vs. 7–10 s with OpenAI**.
-- **Integrability:** Jev returns typed answers (choice, probabilities, confidence) that drop straight
-  into workflow variables and `if` conditions. There's no prompt-and-parse step.
-- **Safety:** OpenAI contradicted itself ("delivered at the address: 0.99" *and* "wrong
-  location: 0.99"), and it reports 0.99 self-reported confidence even when wrong. Jev's confidence
-  was low on the genuinely borderline case. See [EXPERIMENTS.md](EXPERIMENTS.md).
-- **Guardrails belong in the workflow:** order ownership checks, contradiction checks, and confidence
-  gates sit outside the model, so prompt injection can't spend money.
+- **Speed:** a Jev call takes **~150 ms**; an OpenAI call takes **~1.4–1.9 s**. A four-call workflow finishes in **~1 s with Jev vs. 5–10 s with OpenAI**.
+- **Integrability:** Jev's typed answers drop straight into workflow variables and `if` conditions. There's no prompt-and-parse step.
+- **Safety:** on prompt injections, OpenAI's own answer was often "cancel the order"; Jev escalated every time. See [EXPERIMENTS.md](EXPERIMENTS.md).
+- **Guardrails belong in the workflow:** ownership checks, contradiction checks and confidence gates sit outside the model, so a bad answer can't spend money.
 
 ## What is [Jev](https://docs.typesafe.ai/introduction/quickstart)?
 
@@ -101,51 +96,40 @@ valid.doIf(claim.jsonPath("$.confidence").isLessThan(MIN_CLAIM_CONFIDENCE), t ->
 
 ## Jev vs. OpenAI
 
-Both engines run identical workflows, questions, and guardrails; only the decision task differs.
-Method, raw numbers and caveats are in [EXPERIMENTS.md](EXPERIMENTS.md).
+- Every workflow has an OpenAI version (`-openai`) with the same questions and guardrails; only the decision task differs.
+- Full results are in [EXPERIMENTS.md](EXPERIMENTS.md).
 
-| | Jev (`jev-1.13`) | `gpt-5.6-luna` (low) | `gpt-5.6-terra` (medium) |
+| | Jev | `gpt-5.6-luna` | `gpt-5.6-terra` |
 |---|---|---|---|
 | One model call, median | **~150 ms** | ~1.9 s | ~1.4 s |
-| 4-call workflow, model time (range) | **0.5–1.0 s** | 6.2–9.7 s | 4.7–8.6 s |
+| 4-call workflow, model time | **0.5–1.0 s** | 6.2–9.7 s | 4.7–8.6 s |
 | Matched expected outcome (32 runs) | **32** | 30 | **32** |
-| Model chose "cancel" on an injection | **0/6** | 6/6 | 3/6 |
-| Self-contradicting tracking answers | **0/10** | 1/10 | **0/10** |
+| Model chose "cancel" on a prompt injection | **0/6** | 6/6 | 3/6 |
+| Tracking answers that contradicted themselves | **0/10** | 1/10 | **0/10** |
 
-Numbers are from experiment 1 in [EXPERIMENTS.md](EXPERIMENTS.md), which also notes an earlier run where Jev's confidence dropped when it was wrong while OpenAI's stayed at 0.98.
+- **Prompt injection:** the OpenAI models often chose to cancel the order, and only the workflow's manipulation check stopped them. Jev escalated on its own.
+- **Self-contradiction:** OpenAI can say a package was left "at the address" *and* "at the wrong location", both at 0.99. The workflow's contradiction check catches it.
+- **Pass labels, not indices, between model calls.** A bare score like `2.0` made Jev's answer depend on JSON key order (experiment 2).
+- **Switch the OpenAI model** without code changes: `OPENAI_MODEL=gpt-5.6-terra OPENAI_REASONING_EFFORT=medium ./gradlew quarkusDev`.
 
-Highlights:
-- **Prompt injection:** both OpenAI models often chose to cancel the order; only the manipulation check in the WfSpec stopped it. Jev escalated on its own every time.
-- **Self-contradiction:** both OpenAI models sometimes said "delivered at the address" *and* "wrong location" at 0.99. Terra did it on a package that was never delivered.
-- **Key order flipped a Jev decision:** a bare Score index passed to the next call was ambiguous. Pass labels, not indices.
-- **Switch the OpenAI twin to another model** without code changes: `OPENAI_MODEL=gpt-5.6-terra OPENAI_REASONING_EFFORT=medium ./gradlew quarkusDev`.
+### How the OpenAI version gets structured output
 
-### How the OpenAI twin gets structured output
+- [`OpenAiModel`](src/main/java/io/littlehorse/common/llm/OpenAiModel.java) turns the same policy questions into a strict JSON schema (`response_format: json_schema`, `strict: true`):
+  - Choice → `{choice: enum[option keys], confidence}`. The enum means OpenAI can only answer with the policy's options.
+  - Noul → `{noul}`
+  - Score → `{score: integer, confidence}`
+- The reply becomes the same `ModelResponse` that Jev's answer becomes, so decision workers and workflows don't care which engine answered.
+- What strict mode doesn't give you:
+  - **Calibrated confidence.** OpenAI's confidence is self-reported and almost always 0.95 or higher, so confidence gates rarely fire.
+  - **Probabilities or fractional scores.**
+  - **Range checks.** Values meant to be 0–1 aren't enforced.
+  - **Consistent answers.** The shape is always right; the content can still contradict itself.
+  - **Refusal handling.** A refusal fails the task, and LittleHorse retries it.
 
-[`OpenAiModel`](src/main/java/io/littlehorse/common/llm/OpenAiModel.java) answers the same policy questions as Jev, using OpenAI's strict JSON-schema output (`response_format: json_schema`, `strict: true`):
-
-1. **Each question becomes a required schema field, typed by question type.**
-   - Choice → `{choice: enum[option keys], confidence}`
-   - Noul → `{noul}`
-   - Score → `{score: integer, confidence}`
-
-   The enum means OpenAI can only answer with one of the policy's option keys, the same allowlist Jev gives.
-2. **The reply is mapped into the shared `ModelResponse`.** Decision workers, `jsonPath` branches and gates are identical for both engines.
-
-What strict mode does **not** give you:
-- **Calibrated confidence.** OpenAI's confidence is self-reported. It stayed at 0.93 or above, so confidence gates rarely fire for it.
-- **Probabilities or fractional scores.** `probabilities` is left out, and Score is a whole-number index.
-- **Range checks.** Values meant to be 0–1 aren't enforced.
-- **Correct answers.** The answer always has the right shape, but it can still contradict itself. The contradiction check in the WfSpec exists for this.
-- **Special handling of refusals.** A refusal or empty reply fails to parse, so the task fails and `withRetries(2)` tries again.
-
-**Option: LittleHorse Structs.** Decision tasks here return a `Map`, which LittleHorse stores as `JSON_OBJ`, so nothing checks the answer's shape once it leaves the worker. With Structs:
-- A decision task returns an `@LHStructDef` class instead of a `Map`, e.g. `ClaimResolution { decision, confidence }`.
-- The WfSpec declares the variable with `wf.declareStruct("resolution", ClaimResolution.class)`.
-- lh-quarkus registers the StructDef, and LittleHorse type-checks every answer against it, from either engine.
-- The answer's schema then lives in one place, in LittleHorse as well as in the worker.
-
-This demo doesn't use Structs yet.
+**Option: LittleHorse Structs**
+- Today, decision tasks return a `Map`, which LittleHorse stores as untyped `JSON_OBJ`.
+- With Structs, a decision task returns an `@LHStructDef` class (e.g. `ClaimResolution { decision, confidence }`). The WfSpec declares it with `wf.declareStruct(...)`, and LittleHorse type-checks every answer.
+- Not used in this demo yet.
 
 ## Run it
 
@@ -156,7 +140,7 @@ docker run --name littlehorse -d -p 2023:2023 -p 8080:8080 \
 ./gradlew quarkusDev        # registers the WfSpecs, runs the task workers and two HTTP services (carrier, helpdesk) · dashboard on :8080
 ```
 
-Start any workflow with `lhctl run <wfSpec> <var> <value> ...`. Swap `-jev` for `-openai` to run the OpenAI twin.
+Start any workflow with `lhctl run <wfSpec> <var> <value> ...`. Swap `-jev` for `-openai` to run the OpenAI version.
 
 ```shell script
 # Support ticket triage
