@@ -3,25 +3,20 @@ package io.littlehorse.examples.package_claim.infra;
 import java.util.List;
 import java.util.Map;
 
-/** CRM: each customer's account age and past claims. */
+/** CRM: each customer's account age and past claims. Anyone not listed is an established customer with no claims. */
 public final class Crm {
 
     private Crm() {}
 
     private static final Map<String, Map<String, Object>> CUSTOMERS = Map.of(
-            "alice", customer("alice", 1460, 32, List.of()),
-            "carol", customer("carol", 700, 10, List.of()),
             "dave", customer("dave", 60, 6, List.of(
                     claim("ORD-3901", "2026-09-12", "missing package", "refunded"),
                     claim("ORD-3822", "2026-08-03", "missing package", "refunded"),
                     claim("ORD-3790", "2026-07-19", "missing package", "reshipped"),
-                    claim("ORD-3701", "2026-06-02", "missing package", "refunded"))),
-            "erin", customer("erin", 900, 18, List.of()),
-            "frank", customer("frank", 400, 7, List.of()),
-            "gina", customer("gina", 1200, 25, List.of(claim("ORD-6102", "2025-03-14", "damaged item", "replaced"))));
+                    claim("ORD-3701", "2026-06-02", "missing package", "refunded"))));
 
     public static Map<String, Object> claims(String customerId) {
-        return CUSTOMERS.getOrDefault(customerId, customer(customerId, 0, 0, List.of()));
+        return CUSTOMERS.getOrDefault(customerId, customer(customerId, 1000, 20, List.of()));
     }
 
     private static Map<String, Object> customer(

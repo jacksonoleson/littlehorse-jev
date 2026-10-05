@@ -27,8 +27,6 @@ public class CarrierResource {
                     "events", List.of(
                             event("2026-09-29T09:00:00Z", "Salt Lake City UT", "Departed facility"),
                             event("2026-10-01T07:30:00Z", "Salt Lake City UT", "Delayed: severe weather on route"))),
-            "TRK-6001", delivered("TRK-6001", "19 Elm St, Dayton OH", 6,
-                    Map.of("photo", "Box at the front door"), "2026-10-03T16:20:00Z"),
             "TRK-7001", delivered("TRK-7001", "44 Spruce Way, Reno NV", 15,
                     Map.of("photo", "Small padded envelope in the mailbox"), "2026-10-02T12:00:00Z"));
 

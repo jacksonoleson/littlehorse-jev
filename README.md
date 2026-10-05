@@ -137,7 +137,7 @@ lhctl run handle-support-ticket-jev user-id alice email-body "Please cancel ORD-
 lhctl run dispatch-support-ticket user-id alice email-body "ORD-1001 arrived broken, I want to send it back."
 # Package claim
 lhctl run package-claim-jev user-id carol email-body "ORD-3001 says delivered but nothing is here."
-# Candidate screening (APP-101 … APP-107)
+# Candidate screening (APP-101, APP-103 … APP-106)
 lhctl run screen-candidate-jev application-id APP-101
 
 # Then: watch it in the dashboard (localhost:8080) or
@@ -152,11 +152,11 @@ lhctl get variable <wfRunId> 0 outcome     # `status` / `decision` for support t
 | Package claims | Expected | Candidates | Expected |
 |---|---|---|---|
 | `alice` ORD-1001, photo on porch | reship | APP-101 senior backend | onsite |
-| `carol` ORD-3001, locker 2.4 km away | refund | APP-102 engineering manager | onsite |
-| `dave` ORD-4001, signed for, 4 recent claims | deny | APP-103 inflated job title | recruiter |
-| `erin` ORD-5001, in transit | ETA email | APP-104 frontend dev, no open role fits | recruiter |
-| `frank` ORD-6001, broken | return label | APP-105 spam | closed |
-| `gina` ORD-7001, $19 | auto-refund | APP-106 wants remote only / APP-107 missing must-have | recruiter |
+| `carol` ORD-3001, locker 2.4 km away | refund | APP-103 inflated job title | recruiter review |
+| `dave` ORD-4001, signed for, 4 recent claims | deny | APP-104 frontend dev, no open role fits | recruiter review |
+| `erin` ORD-5001, in transit | ETA email | APP-105 spam | closed |
+| `frank` ORD-6001, broken | return label | APP-106 wants remote only | recruiter review |
+| `gina` ORD-7001, $19 | auto-refund | | |
 
 
 ## Links

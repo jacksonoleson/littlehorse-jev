@@ -125,9 +125,6 @@ public final class ScreeningPolicy {
                                 "what", "Senior backend engineer: designs, builds, and scales services, usually in"
                                         + " Python or Go",
                                 "not_for", "Frontend-only, data-pipeline-focused, or people-management careers"),
-                        "ENGINEERING_MANAGER", Map.of(
-                                "what", "Engineering manager: leads teams with direct reports, hires, and runs planning",
-                                "not_for", "Individual contributors, even senior ones who mentor"),
                         "DATA_ENGINEER", Map.of(
                                 "what", "Data engineer: builds data pipelines, warehouses, and analytics data models",
                                 "not_for", "General backend services or data science"),
