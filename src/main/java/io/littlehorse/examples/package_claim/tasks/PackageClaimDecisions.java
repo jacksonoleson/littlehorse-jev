@@ -119,7 +119,8 @@ public class PackageClaimDecisions {
         ModelResponse r = ask(engine, ctx,
                 Map.of("customer_email", emailBody, "claim_history", history), RISK_QUESTIONS);
         ModelResponse.Answer risk = r.get("abuse_risk");
-        return r.toResult("abuse_risk", risk.score(), "confidence", risk.confidence(),
+        return r.toResult("abuse_risk", RISK_LEVELS.get((int) Math.round(risk.score())),
+                "confidence", risk.confidence(),
                 "pressure_tactics", r.get("pressure_tactics").noul());
     }
 

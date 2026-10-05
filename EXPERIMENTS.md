@@ -96,7 +96,7 @@ Things we measured while building this demo. The [README](README.md) covers how 
 
 | Test | Result |
 |---|---|
-| Same request ×5 | Same answer every time: Jev is deterministic |
+| Same request ×5 | Same choice every time; probabilities vary by a few hundredths |
 | Swap input values between a DENIED and a RESHIPPED run | No change, so the values aren't the cause |
 | All 24 orderings of the Choice options | DENY 24/24, so option order doesn't matter |
 | All 120 top-level key orderings, `tracking_evidence` first in `assessment` | DENY 90, RESHIP 30 |
@@ -117,8 +117,14 @@ Things we measured while building this demo. The [README](README.md) covers how 
 
 **Takeaways**
 - **When one model call feeds another, pass self-describing values.** An index means something only next to the question that produced it.
-- **Build state with ordered maps** (`LinkedHashMap`) so a restart can't change the request. Do this together with the first fix; on its own it only hides the ambiguity.
-- **Determinism made this easy to debug.** Old WfRuns could be replayed exactly from LittleHorse's stored task inputs.
+- **Make the request independent of `Map` order.** Do this together with the first fix; on its own it only hides the ambiguity.
+- **Stable choices made this easy to debug.** Old WfRuns could be replayed from LittleHorse's stored task inputs and gave the same choice every time.
+
+**Applied (10-05):**
+- `assess-risk` now returns `abuse_risk` as `LOW` / `MEDIUM` / `HIGH`.
+- A Jackson customizer (`SortedJsonKeys`) sorts map keys in every JSON request, so the request is the same after a restart.
+
+Result: on two separate restarts, all 6 seeded claims matched (dave: DENY at 1.0 both times). Alice's probabilities moved by 0.01, and so did 6 identical requests sent back to back. That is Jev's own small variation, not request order.
 
 ---
 

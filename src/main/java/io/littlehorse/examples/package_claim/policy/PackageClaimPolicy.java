@@ -57,6 +57,9 @@ public final class PackageClaimPolicy {
             "pressure_tactics", Question.noul(
                     "Does `customer_email` use threats, demands, or urgency to pressure for an immediate refund?"));
 
+    /** Names for the abuse_risk levels above. Later calls get the name: a bare index like 2.0 is ambiguous. */
+    public static final List<String> RISK_LEVELS = List.of("LOW", "MEDIUM", "HIGH");
+
     /** Sent as {@code policy} in decision 4's state. */
     public static final List<String> RESOLUTION_POLICY = List.of(
             "Carrier delivered to the wrong place: refund the customer; we recover the loss from the carrier.",
