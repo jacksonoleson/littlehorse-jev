@@ -7,7 +7,7 @@ import java.util.Map;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 @RegisterRestClient(configKey = "carrier")
-@Path("/mock/carrier")
+@Path("/carrier")
 public interface CarrierClient {
 
     @GET

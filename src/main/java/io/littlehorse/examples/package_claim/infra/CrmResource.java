@@ -6,9 +6,9 @@ import jakarta.ws.rs.PathParam;
 import java.util.List;
 import java.util.Map;
 
-/** Fake CRM API with each customer's account age and past claims, served by this app. */
-@Path("/mock/crm")
-public class MockCrmResource {
+/** CRM API with each customer's account age and past claims, served by this app. */
+@Path("/crm")
+public class CrmResource {
 
     private static final Map<String, Map<String, Object>> CUSTOMERS = Map.of(
             "alice", customer("alice", 1460, 32, List.of()),

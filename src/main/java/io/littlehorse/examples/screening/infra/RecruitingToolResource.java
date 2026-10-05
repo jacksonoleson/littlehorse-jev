@@ -23,21 +23,21 @@ import java.util.TreeMap;
 import org.jboss.logging.Logger;
 
 /**
- * Fake recruiting tool, served by this app, whose "recruiter" is Jev. It reads the WfRun's state, decides,
+ * Recruiting tool, served by this app, whose "recruiter" is Jev. It reads the WfRun's state, decides,
  * and completes the recruiter-review user task through the same API a recruiter's UI would use.
  */
-@Path("/mock/recruiting")
-public class MockRecruitingToolResource {
+@Path("/recruiting")
+public class RecruitingToolResource {
 
     public static final String REVIEWER = "jev-recruiter";
 
-    private static final Logger LOG = Logger.getLogger(MockRecruitingToolResource.class);
+    private static final Logger LOG = Logger.getLogger(RecruitingToolResource.class);
 
     private final LittleHorseBlockingStub lh;
     private final JevModel jev;
     private final ObjectMapper json;
 
-    public MockRecruitingToolResource(LittleHorseBlockingStub lh, JevModel jev, ObjectMapper json) {
+    public RecruitingToolResource(LittleHorseBlockingStub lh, JevModel jev, ObjectMapper json) {
         this.lh = lh;
         this.jev = jev;
         this.json = json;

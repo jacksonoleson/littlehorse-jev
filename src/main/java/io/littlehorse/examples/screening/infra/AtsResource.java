@@ -7,9 +7,9 @@ import jakarta.ws.rs.PathParam;
 import java.util.List;
 import java.util.Map;
 
-/** Fake applicant tracking system: job applications (with PII) and open roles. */
-@Path("/mock/ats")
-public class MockAtsResource {
+/** Applicant tracking system: job applications (with PII) and open roles. */
+@Path("/ats")
+public class AtsResource {
 
     private static final Map<String, Map<String, Object>> APPLICATIONS = Map.of(
             "APP-101", application("APP-101", "Priya Raman", "priya@example.com",

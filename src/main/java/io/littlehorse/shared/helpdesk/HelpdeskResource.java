@@ -14,19 +14,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.jboss.logging.Logger;
 
 /**
- * Fake helpdesk, served by this app. A mock agent resolves every case after a short delay and posts
+ * Helpdesk, served by this app. An agent resolves every case after a short delay and posts
  * the case's callback ExternalEvent, standing in for a real helpdesk's "resolved" webhook.
  */
-@Path("/mock/helpdesk")
-public class MockHelpdeskResource {
+@Path("/helpdesk")
+public class HelpdeskResource {
 
-    private static final Logger LOG = Logger.getLogger(MockHelpdeskResource.class);
+    private static final Logger LOG = Logger.getLogger(HelpdeskResource.class);
     private static final Executor AGENT = CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS);
 
     private final LittleHorseBlockingStub lh;
     private final AtomicInteger nextCase = new AtomicInteger(100);
 
-    public MockHelpdeskResource(LittleHorseBlockingStub lh) {
+    public HelpdeskResource(LittleHorseBlockingStub lh) {
         this.lh = lh;
     }
 
@@ -48,8 +48,8 @@ public class MockHelpdeskResource {
                 .setWfRunId(LHLibUtil.wfRunIdFromString(c.wfRunId()))
                 .setExternalEventDefId(ExternalEventDefId.newBuilder().setName(c.callbackEvent()))
                 .setContent(LHLibUtil.objToVarVal(
-                        Map.of("case_id", caseId, "resolution", "RESOLVED", "resolved_by", "mock-agent")))
+                        Map.of("case_id", caseId, "resolution", "RESOLVED", "resolved_by", "support-agent")))
                 .build());
-        LOG.infof("Helpdesk %s resolved by mock-agent", caseId);
+        LOG.infof("Helpdesk %s resolved by support-agent", caseId);
     }
 }

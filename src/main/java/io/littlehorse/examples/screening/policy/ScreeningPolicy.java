@@ -102,7 +102,7 @@ public final class ScreeningPolicy {
                             "DECLINE", "Clearly misses the role's must-haves")));
 
     /**
-     * Asked by the Jev "recruiter" in the mock recruiting tool to complete the recruiter-review user task.
+     * Asked by the Jev "recruiter" in the recruiting tool to complete the recruiter-review user task.
      * State: every WfRun variable, plus {@code review_reason} (the user task's notes).
      */
     public static final Map<String, Question> RECRUITER_REVIEW_QUESTIONS = Map.of(

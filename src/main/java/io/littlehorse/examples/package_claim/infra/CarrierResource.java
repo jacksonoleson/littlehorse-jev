@@ -6,9 +6,9 @@ import jakarta.ws.rs.PathParam;
 import java.util.List;
 import java.util.Map;
 
-/** Fake parcel-carrier tracking API, served by this app so tasks make a real HTTP call. */
-@Path("/mock/carrier")
-public class MockCarrierResource {
+/** Parcel-carrier tracking API, served by this app so tasks make a real HTTP call. */
+@Path("/carrier")
+public class CarrierResource {
 
     private static final Map<String, Map<String, Object>> TRACKING = Map.of(
             "TRK-1001", delivered("TRK-1001", "12 Birch Ln, Portland OR", 8,

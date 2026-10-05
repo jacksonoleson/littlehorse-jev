@@ -7,7 +7,7 @@ import java.util.Map;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 @RegisterRestClient(configKey = "verify")
-@Path("/mock/verify")
+@Path("/verify")
 public interface VerificationClient {
 
     @GET

@@ -7,7 +7,7 @@ import java.util.Map;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 @RegisterRestClient(configKey = "crm")
-@Path("/mock/crm")
+@Path("/crm")
 public interface CrmClient {
 
     @GET

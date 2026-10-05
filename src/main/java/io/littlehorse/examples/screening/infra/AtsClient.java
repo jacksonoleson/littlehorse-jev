@@ -7,7 +7,7 @@ import java.util.Map;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 @RegisterRestClient(configKey = "ats")
-@Path("/mock/ats")
+@Path("/ats")
 public interface AtsClient {
 
     @GET

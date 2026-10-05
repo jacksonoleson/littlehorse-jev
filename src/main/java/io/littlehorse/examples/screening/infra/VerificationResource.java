@@ -6,9 +6,9 @@ import jakarta.ws.rs.PathParam;
 import java.util.List;
 import java.util.Map;
 
-/** Fake employment-verification vendor: what past employers actually have on record. */
-@Path("/mock/verify")
-public class MockVerificationResource {
+/** Employment-verification vendor: what past employers actually have on record. */
+@Path("/verify")
+public class VerificationResource {
 
     private static final Map<String, List<Map<String, String>>> RECORDS = Map.of(
             "APP-101", List.of(

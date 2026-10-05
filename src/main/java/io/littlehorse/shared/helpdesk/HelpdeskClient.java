@@ -6,7 +6,7 @@ import java.util.Map;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 @RegisterRestClient(configKey = "helpdesk")
-@Path("/mock/helpdesk")
+@Path("/helpdesk")
 public interface HelpdeskClient {
 
     /** {@code callbackEvent} is the ExternalEventDef the helpdesk posts to {@code wfRunId} once resolved. */

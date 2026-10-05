@@ -6,7 +6,7 @@ import java.util.Map;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 @RegisterRestClient(configKey = "recruiting")
-@Path("/mock/recruiting")
+@Path("/recruiting")
 public interface RecruitingToolClient {
 
     /** Identifies one UserTaskRun: its WfRun plus the task's guid. */
