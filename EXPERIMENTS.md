@@ -28,6 +28,7 @@ Things we measured while building this demo. The [README](README.md) covers how 
   - the same "is this manipulation?" question
 - Shared guardrail: a manipulation flag sends the ticket to a human. Jev also escalates when confidence is below 0.7; OpenAI reports no confidence.
 - 3 tickets × 2 rounds × 2 engines, sent one at a time.
+- *Since 10-05, both engines use the shared decision path, and the gates run in the WfSpec. OpenAI now reports a self-assessed confidence, so the 0.7 gate applies to it too.*
 
 **Latency (ms)**
 

@@ -1,8 +1,11 @@
 package io.littlehorse.examples.support_ticket.workflow;
 
+import static io.littlehorse.examples.support_ticket.policy.SupportTicketPolicy.MAX_MANIPULATION;
+import static io.littlehorse.examples.support_ticket.policy.SupportTicketPolicy.MIN_CONFIDENCE;
+import static io.littlehorse.examples.support_ticket.tasks.SupportTicketDecisions.PICK_WORKFLOW;
 import static io.littlehorse.examples.support_ticket.tasks.SupportTicketTasks.*;
+import static io.littlehorse.shared.models.DecisionModels.JEV;
 
-import io.littlehorse.examples.support_ticket.tasks.JevDispatcher;
 import io.littlehorse.quarkus.workflow.LHWorkflow;
 import io.littlehorse.sdk.wfsdk.SpawnedChildWf;
 import io.littlehorse.sdk.wfsdk.WfRunVariable;
@@ -32,6 +35,7 @@ public class DispatchWorkflows {
         WfRunVariable status = wf.declareStr("status").searchable();
         WfRunVariable orderId = wf.declareStr("order-id").searchable();
         WfRunVariable childWf = wf.declareStr("child-wf").searchable();
+        WfRunVariable pick = wf.declareJsonObj("workflow-pick");
         WfRunVariable resolution = wf.declareStr("resolution");
 
         status.assign("TRIAGING");
@@ -41,9 +45,15 @@ public class DispatchWorkflows {
         wf.doIfElse(
                 wf.execute(VALIDATE_ORDER_AND_USER, userId, orderId).isEqualTo(false),
                 invalid -> childWf.assign(ESCALATE_TO_HELPDESK),
-                valid -> childWf.assign(valid.execute(JevDispatcher.CHOOSE_WORKFLOW, emailBody, orderId)
-                        .timeout(60)
-                        .withRetries(2)));
+                valid -> {
+                    pick.assign(valid.execute(PICK_WORKFLOW + JEV, emailBody, orderId).timeout(60).withRetries(2));
+                    // A Choice answer is always a catalog key, so the child is always on the allowlist.
+                    valid.doIfElse(
+                            pick.jsonPath("$.manipulation").isGreaterThan(MAX_MANIPULATION)
+                                    .or(pick.jsonPath("$.confidence").isLessThan(MIN_CONFIDENCE)),
+                            guardrail -> childWf.assign(ESCALATE_TO_HELPDESK),
+                            confident -> childWf.assign(pick.jsonPath("$.workflow")));
+                });
 
         status.assign("DISPATCHED");
         SpawnedChildWf child = wf.runWf(childWf, Map.of("user-id", userId, "order-id", orderId));
