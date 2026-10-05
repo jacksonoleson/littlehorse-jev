@@ -1,7 +1,7 @@
 package io.littlehorse.examples.screening.tasks;
 
 import static io.littlehorse.examples.screening.policy.ScreeningPolicy.RECRUITER_REVIEW_QUESTIONS;
-import static io.littlehorse.shared.models.DecisionModels.JEV;
+import static io.littlehorse.common.models.DecisionModels.JEV;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,8 +16,8 @@ import io.littlehorse.sdk.common.proto.Variable;
 import io.littlehorse.sdk.common.proto.VariableValue;
 import io.littlehorse.sdk.worker.LHTaskMethod;
 import io.littlehorse.sdk.worker.WorkerContext;
-import io.littlehorse.shared.models.DecisionModels;
-import io.littlehorse.shared.models.ModelResponse;
+import io.littlehorse.common.models.DecisionModels;
+import io.littlehorse.common.models.ModelResponse;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;

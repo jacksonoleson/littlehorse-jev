@@ -1,12 +1,12 @@
 package io.littlehorse.examples.screening.tasks;
 
 import static io.littlehorse.examples.screening.policy.ScreeningPolicy.*;
-import static io.littlehorse.shared.models.DecisionModels.JEV;
-import static io.littlehorse.shared.models.DecisionModels.OPENAI;
+import static io.littlehorse.common.models.DecisionModels.JEV;
+import static io.littlehorse.common.models.DecisionModels.OPENAI;
 
-import io.littlehorse.shared.jev.SystemOne.Question;
-import io.littlehorse.shared.models.DecisionModels;
-import io.littlehorse.shared.models.ModelResponse;
+import io.littlehorse.common.jev.SystemOne.Question;
+import io.littlehorse.common.models.DecisionModels;
+import io.littlehorse.common.models.ModelResponse;
 import io.littlehorse.quarkus.task.LHTask;
 import io.littlehorse.sdk.worker.LHTaskMethod;
 import io.littlehorse.sdk.worker.WorkerContext;

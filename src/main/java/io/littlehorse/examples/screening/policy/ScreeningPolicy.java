@@ -1,6 +1,6 @@
 package io.littlehorse.examples.screening.policy;
 
-import io.littlehorse.shared.jev.SystemOne.Question;
+import io.littlehorse.common.jev.SystemOne.Question;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;

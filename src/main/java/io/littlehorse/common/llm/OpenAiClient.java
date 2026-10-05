@@ -1,4 +1,4 @@
-package io.littlehorse.shared.llm;
+package io.littlehorse.common.llm;
 
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;

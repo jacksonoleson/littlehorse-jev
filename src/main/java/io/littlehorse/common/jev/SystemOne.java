@@ -1,4 +1,4 @@
-package io.littlehorse.shared.jev;
+package io.littlehorse.common.jev;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;

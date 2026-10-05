@@ -1,4 +1,4 @@
-package io.littlehorse.shared.helpdesk;
+package io.littlehorse.common.helpdesk;
 
 import io.littlehorse.sdk.common.LHLibUtil;
 import io.littlehorse.sdk.common.proto.ExternalEventDefId;

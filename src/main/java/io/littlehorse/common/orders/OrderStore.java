@@ -1,4 +1,4 @@
-package io.littlehorse.shared.orders;
+package io.littlehorse.common.orders;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.math.BigDecimal;
 import java.util.List;

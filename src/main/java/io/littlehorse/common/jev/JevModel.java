@@ -1,6 +1,6 @@
-package io.littlehorse.shared.jev;
+package io.littlehorse.common.jev;
 
-import io.littlehorse.shared.models.ModelResponse;
+import io.littlehorse.common.models.ModelResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.LinkedHashMap;
 import java.util.Map;

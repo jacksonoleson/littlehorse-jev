@@ -1,6 +1,6 @@
 package io.littlehorse.examples.package_claim.policy;
 
-import io.littlehorse.shared.jev.SystemOne.Question;
+import io.littlehorse.common.jev.SystemOne.Question;
 import java.util.List;
 import java.util.Map;
 
@@ -13,16 +13,18 @@ public final class PackageClaimPolicy {
 
     /** Below this, a human decides what the customer is reporting. */
     public static final double MIN_CLAIM_CONFIDENCE = 0.7;
+    
     /** Proof at the address and wrong location both above this is contradictory evidence. */
     public static final double CONTRADICTION = 0.7;
+    
     /** Below this, the package is treated as still in transit. */
     public static final double DELIVERED = 0.5;
+    
     /** Below this order total, refunding is cheaper than reviewing. */
     public static final double AUTO_REFUND_BELOW_USD = 50.0;
+    
     /** Money moves only above this. */
     public static final double MIN_RESOLUTION_CONFIDENCE = 0.8;
-
-    // ---- Questions ----
 
     /** Decision 1. State: {@code customer_email}, {@code order}. */
     public static final Map<String, Question> CLAIM_QUESTIONS = Map.of(

@@ -1,6 +1,6 @@
 package io.littlehorse.examples.support_ticket.policy;
 
-import io.littlehorse.shared.jev.SystemOne.Question;
+import io.littlehorse.common.jev.SystemOne.Question;
 import java.util.Map;
 
 /** Every model question and threshold in the support-ticket triage workflow. */

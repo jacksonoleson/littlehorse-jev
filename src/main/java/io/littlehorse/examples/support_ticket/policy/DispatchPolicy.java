@@ -3,7 +3,7 @@ package io.littlehorse.examples.support_ticket.policy;
 import static io.littlehorse.examples.support_ticket.policy.SupportTicketPolicy.MANIPULATION_INSTRUCTIONS;
 
 import io.littlehorse.examples.support_ticket.workflow.DispatchWorkflows;
-import io.littlehorse.shared.jev.SystemOne.Question;
+import io.littlehorse.common.jev.SystemOne.Question;
 import java.util.LinkedHashMap;
 import java.util.Map;
 

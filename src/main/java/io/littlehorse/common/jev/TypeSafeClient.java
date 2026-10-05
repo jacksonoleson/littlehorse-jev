@@ -1,4 +1,4 @@
-package io.littlehorse.shared.jev;
+package io.littlehorse.common.jev;
 
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;

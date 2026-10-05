@@ -1,10 +1,10 @@
-package io.littlehorse.shared.llm;
+package io.littlehorse.common.llm;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.littlehorse.shared.jev.SystemOne;
-import io.littlehorse.shared.models.ModelResponse;
+import io.littlehorse.common.jev.SystemOne;
+import io.littlehorse.common.models.ModelResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -13,7 +13,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 /**
- * Answers the same typed (TypeSafe-format) questions as {@link io.littlehorse.shared.jev.JevModel}, using an
+ * Answers the same typed (TypeSafe-format) questions as {@link io.littlehorse.common.jev.JevModel}, using an
  * OpenAI chat model. Chat models don't return probabilities, so confidence here is self-reported.
  */
 @ApplicationScoped

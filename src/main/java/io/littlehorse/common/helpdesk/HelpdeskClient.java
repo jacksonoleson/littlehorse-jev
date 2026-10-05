@@ -1,4 +1,4 @@
-package io.littlehorse.shared.helpdesk;
+package io.littlehorse.common.helpdesk;
 
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;

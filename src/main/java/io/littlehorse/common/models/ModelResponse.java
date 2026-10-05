@@ -1,4 +1,4 @@
-package io.littlehorse.shared.models;
+package io.littlehorse.common.models;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

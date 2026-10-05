@@ -4,7 +4,7 @@ import static io.littlehorse.examples.support_ticket.policy.SupportTicketPolicy.
 import static io.littlehorse.examples.support_ticket.policy.SupportTicketPolicy.MIN_CONFIDENCE;
 import static io.littlehorse.examples.support_ticket.tasks.SupportTicketDecisionWorker.PICK_WORKFLOW;
 import static io.littlehorse.examples.support_ticket.tasks.SupportTicketWorker.*;
-import static io.littlehorse.shared.models.DecisionModels.JEV;
+import static io.littlehorse.common.models.DecisionModels.JEV;
 
 import io.littlehorse.quarkus.workflow.LHWorkflow;
 import io.littlehorse.sdk.wfsdk.SpawnedChildWf;

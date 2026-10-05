@@ -1,13 +1,12 @@
 package io.littlehorse.examples.support_ticket.tasks;
 
-import io.littlehorse.shared.orders.Order;
 import io.littlehorse.quarkus.task.LHTask;
 import io.littlehorse.sdk.common.LHLibUtil;
 import io.littlehorse.sdk.worker.LHTaskMethod;
 import io.littlehorse.sdk.worker.WorkerContext;
-import io.littlehorse.shared.helpdesk.HelpdeskClient;
-import io.littlehorse.shared.orders.Order;
-import io.littlehorse.shared.orders.OrderStore;
+import io.littlehorse.common.helpdesk.HelpdeskClient;
+import io.littlehorse.common.orders.Order;
+import io.littlehorse.common.orders.OrderStore;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

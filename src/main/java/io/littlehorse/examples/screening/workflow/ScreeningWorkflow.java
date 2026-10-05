@@ -5,8 +5,8 @@ import static io.littlehorse.examples.screening.tasks.RecruiterDecisionWorker.CO
 import static io.littlehorse.examples.screening.tasks.ScreeningDecisionWorker.*;
 import static io.littlehorse.examples.screening.tasks.ScreeningWorker.*;
 import static io.littlehorse.examples.screening.workflow.RecruiterReviewForm.RECRUITER_REVIEW;
-import static io.littlehorse.shared.models.DecisionModels.JEV;
-import static io.littlehorse.shared.models.DecisionModels.OPENAI;
+import static io.littlehorse.common.models.DecisionModels.JEV;
+import static io.littlehorse.common.models.DecisionModels.OPENAI;
 
 import io.littlehorse.quarkus.workflow.LHWorkflow;
 import io.littlehorse.sdk.wfsdk.TaskNodeOutput;

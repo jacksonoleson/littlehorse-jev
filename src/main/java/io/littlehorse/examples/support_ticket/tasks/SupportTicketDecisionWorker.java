@@ -2,16 +2,16 @@ package io.littlehorse.examples.support_ticket.tasks;
 
 import static io.littlehorse.examples.support_ticket.policy.DispatchPolicy.DISPATCH_QUESTIONS;
 import static io.littlehorse.examples.support_ticket.policy.SupportTicketPolicy.TRIAGE_QUESTIONS;
-import static io.littlehorse.shared.models.DecisionModels.JEV;
-import static io.littlehorse.shared.models.DecisionModels.OPENAI;
+import static io.littlehorse.common.models.DecisionModels.JEV;
+import static io.littlehorse.common.models.DecisionModels.OPENAI;
 
 import io.littlehorse.quarkus.task.LHTask;
 import io.littlehorse.sdk.worker.LHTaskMethod;
 import io.littlehorse.sdk.worker.WorkerContext;
-import io.littlehorse.shared.models.DecisionModels;
-import io.littlehorse.shared.models.ModelResponse;
-import io.littlehorse.shared.orders.Order;
-import io.littlehorse.shared.orders.OrderStore;
+import io.littlehorse.common.models.DecisionModels;
+import io.littlehorse.common.models.ModelResponse;
+import io.littlehorse.common.orders.Order;
+import io.littlehorse.common.orders.OrderStore;
 import java.util.Map;
 
 /**

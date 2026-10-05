@@ -1,8 +1,8 @@
-package io.littlehorse.shared.models;
+package io.littlehorse.common.models;
 
-import io.littlehorse.shared.jev.JevModel;
-import io.littlehorse.shared.jev.SystemOne;
-import io.littlehorse.shared.llm.OpenAiModel;
+import io.littlehorse.common.jev.JevModel;
+import io.littlehorse.common.jev.SystemOne;
+import io.littlehorse.common.llm.OpenAiModel;
 import io.littlehorse.sdk.worker.WorkerContext;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.Map;

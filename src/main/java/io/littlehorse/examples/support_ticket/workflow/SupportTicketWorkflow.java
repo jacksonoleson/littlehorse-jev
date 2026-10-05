@@ -4,8 +4,8 @@ import static io.littlehorse.examples.support_ticket.policy.SupportTicketPolicy.
 import static io.littlehorse.examples.support_ticket.policy.SupportTicketPolicy.MIN_CONFIDENCE;
 import static io.littlehorse.examples.support_ticket.tasks.SupportTicketDecisionWorker.TRIAGE_TICKET;
 import static io.littlehorse.examples.support_ticket.tasks.SupportTicketWorker.*;
-import static io.littlehorse.shared.models.DecisionModels.JEV;
-import static io.littlehorse.shared.models.DecisionModels.OPENAI;
+import static io.littlehorse.common.models.DecisionModels.JEV;
+import static io.littlehorse.common.models.DecisionModels.OPENAI;
 
 import io.littlehorse.examples.support_ticket.tasks.TriageDecision;
 import io.littlehorse.quarkus.workflow.LHWorkflow;
