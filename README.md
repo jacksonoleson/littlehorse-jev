@@ -67,7 +67,7 @@ valid.doIf(claim.get("confidence").isLessThan(MIN_CLAIM_CONFIDENCE), ifBody -> e
 **4. Answers become inputs to later steps:**
 - *The next model call's state:* `decide-resolution` takes the `TrackingEvidence` and `CustomerRisk` Structs from decisions 2 and 3 as typed parameters and hands them to Jev as `state`.
 - *A child workflow name:* `wf.runWf(childWf, inputs)`, where `childWf` is `pick.get("workflow")`, Jev's choice from an allowlist (dispatch).
-- *A task argument:* `t.execute(FETCH_ROLE, triage.jsonPath("$.track"))` fetches the role Jev chose (screening, `JSON_OBJ`).
+- *A task argument:* `thread.execute(FETCH_ROLE, triage.jsonPath("$.track"))` fetches the role Jev chose (screening, `JSON_OBJ`).
 
 ## Structs vs. `JSON_OBJ`
 
