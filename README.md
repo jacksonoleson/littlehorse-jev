@@ -57,10 +57,11 @@ public ClaimClassification classifyClaim(String engine, String emailBody, Map<St
 ```java
 WfRunVariable engine = wf.declareStr("engine").withDefault(JEV).searchable();
 WfRunVariable claim = wf.declareStruct("claim", ClaimClassification.class);
-claim.assign(valid.execute(CLASSIFY_CLAIM, engine, emailBody, order).timeout(60).withRetries(2));
-valid.doIf(claim.get("confidence").isLessThan(MIN_CLAIM_CONFIDENCE), t -> escalate(t, ...))
-     .doElseIf(claim.get("type").isEqualTo("DAMAGED_OR_WRONG_ITEM"), t -> t.execute(SEND_RETURN_LABEL, userId, orderId))
-     .doElseIf(claim.get("type").isEqualTo("MISSING_PACKAGE"), t -> { ... });
+claim.assign(valid.execute(CLASSIFY_CLAIM, engine, emailBody, order));
+
+valid.doIf(claim.get("confidence").isLessThan(MIN_CLAIM_CONFIDENCE), ifBody -> escalate(ifBody, ...))
+     .doElseIf(claim.get("type").isEqualTo("DAMAGED_OR_WRONG_ITEM"), ifBody -> ifBody.execute(SEND_RETURN_LABEL, userId, orderId))
+     .doElseIf(claim.get("type").isEqualTo("MISSING_PACKAGE"), ifBody -> { ... });
 ```
 
 **4. Answers become inputs to later steps:**
