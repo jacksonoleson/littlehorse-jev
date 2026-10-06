@@ -7,7 +7,7 @@ import jakarta.inject.Singleton;
 
 /**
  * Sorts map keys in every JSON body, so a model request is byte-identical across restarts. Without it,
- * {@code Map.of} key order changes per JVM and Jev's answers can change with it (EXPERIMENTS.md #3).
+ * {@code Map.of} key order changes per JVM and Jev's answers can change with it (EXPERIMENTS.md #2).
  */
 @Singleton
 public class SortedJsonKeys implements ObjectMapperCustomizer {

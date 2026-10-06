@@ -1,8 +1,6 @@
 package io.littlehorse.examples.screening.tasks;
 
 import static io.littlehorse.examples.screening.policy.ScreeningPolicy.*;
-import static io.littlehorse.common.models.DecisionModels.JEV;
-import static io.littlehorse.common.models.DecisionModels.OPENAI;
 
 import io.littlehorse.common.jev.SystemOne.Question;
 import io.littlehorse.common.models.DecisionModels;
@@ -19,15 +17,16 @@ import java.util.Map;
  * The four model calls in candidate screening. Questions live in
  * {@link io.littlehorse.examples.screening.policy.ScreeningPolicy}. Each call asks many questions in parallel; a new
  * call is made only when it needs data the previous answer unlocked (a role's requirements, a
- * verification report).
+ * verification report). Unlike the other examples, these return {@code JSON_OBJ}: their shape depends on the
+ * role (a requirement list of any length, a map of skill scores).
  */
 @LHTask
 public class ScreeningDecisionWorker {
 
-    public static final String TRIAGE_APPLICATION = "triage-application-";
-    public static final String CHECK_REQUIREMENTS = "check-requirements-";
-    public static final String VERIFY_HISTORY = "verify-history-";
-    public static final String RECOMMEND_NEXT_STEP = "recommend-next-step-";
+    public static final String TRIAGE_APPLICATION = "triage-application";
+    public static final String CHECK_REQUIREMENTS = "check-requirements";
+    public static final String VERIFY_HISTORY = "verify-history";
+    public static final String RECOMMEND_NEXT_STEP = "recommend-next-step";
 
     private final DecisionModels models;
 
@@ -35,74 +34,28 @@ public class ScreeningDecisionWorker {
         this.models = models;
     }
 
-    @LHTaskMethod(TRIAGE_APPLICATION + JEV)
-    public Map<String, Object> triageJev(Map<String, Object> application, WorkerContext ctx) throws Exception {
-        return triage(JEV, application, ctx);
-    }
-
-    @LHTaskMethod(TRIAGE_APPLICATION + OPENAI)
-    public Map<String, Object> triageOpenAi(Map<String, Object> application, WorkerContext ctx) throws Exception {
-        return triage(OPENAI, application, ctx);
-    }
-
-    @LHTaskMethod(CHECK_REQUIREMENTS + JEV)
-    public Map<String, Object> checkRequirementsJev(
-            Map<String, Object> application, Map<String, Object> role, WorkerContext ctx) throws Exception {
-        return checkRequirements(JEV, application, role, ctx);
-    }
-
-    @LHTaskMethod(CHECK_REQUIREMENTS + OPENAI)
-    public Map<String, Object> checkRequirementsOpenAi(
-            Map<String, Object> application, Map<String, Object> role, WorkerContext ctx) throws Exception {
-        return checkRequirements(OPENAI, application, role, ctx);
-    }
-
-    @LHTaskMethod(VERIFY_HISTORY + JEV)
-    public Map<String, Object> verifyHistoryJev(
-            Map<String, Object> application, Map<String, Object> verification, WorkerContext ctx) throws Exception {
-        return verifyHistory(JEV, application, verification, ctx);
-    }
-
-    @LHTaskMethod(VERIFY_HISTORY + OPENAI)
-    public Map<String, Object> verifyHistoryOpenAi(
-            Map<String, Object> application, Map<String, Object> verification, WorkerContext ctx) throws Exception {
-        return verifyHistory(OPENAI, application, verification, ctx);
-    }
-
-    @LHTaskMethod(RECOMMEND_NEXT_STEP + JEV)
-    public Map<String, Object> recommendJev(
-            Map<String, Object> role, Map<String, Object> fit, Map<String, Object> requirements,
-            Map<String, Object> history, WorkerContext ctx) throws Exception {
-        return recommend(JEV, role, fit, requirements, history, ctx);
-    }
-
-    @LHTaskMethod(RECOMMEND_NEXT_STEP + OPENAI)
-    public Map<String, Object> recommendOpenAi(
-            Map<String, Object> role, Map<String, Object> fit, Map<String, Object> requirements,
-            Map<String, Object> history, WorkerContext ctx) throws Exception {
-        return recommend(OPENAI, role, fit, requirements, history, ctx);
-    }
-
     /** Intent routing + speculative fan-out: route to a track and score every dimension in one call. */
-    private Map<String, Object> triage(String engine, Map<String, Object> application, WorkerContext ctx)
+    @LHTaskMethod(TRIAGE_APPLICATION)
+    public Map<String, Object> triage(String engine, Map<String, Object> application, WorkerContext ctx)
             throws Exception {
         ModelResponse r = models.ask(engine, ctx, Map.of("application", application), TRIAGE_QUESTIONS);
         Map<String, Object> scores = new LinkedHashMap<>();
         DIMENSIONS.keySet().forEach(d -> scores.put(d, r.get(d).score()));
         ModelResponse.Answer track = r.get("track");
-        return r.toResult(
+        return Map.of(
                 "track", track.choice(),
                 "track_confidence", track.confidence(),
-                "track_probabilities", track.probabilities(),
                 "seniority", r.get("seniority").score(),
                 "spam", r.get("spam").noul(),
                 "remote_only", r.get("remote_only").noul(),
-                "scores", scores);
+                "scores", scores,
+                "model", r.model());
     }
 
     /** One Noul per requirement, built from the role the previous answer selected. */
+    @LHTaskMethod(CHECK_REQUIREMENTS)
     @SuppressWarnings("unchecked")
-    private Map<String, Object> checkRequirements(
+    public Map<String, Object> checkRequirements(
             String engine, Map<String, Object> application, Map<String, Object> role, WorkerContext ctx)
             throws Exception {
         List<String> mustHaves = (List<String>) role.get("must_haves");
@@ -127,10 +80,11 @@ public class ScreeningDecisionWorker {
         for (int i = 0; i < niceToHaves.size(); i++) {
             nice.add(Map.of("requirement", niceToHaves.get(i), "met", r.get("nice_to_have_" + i).noul()));
         }
-        return r.toResult("must_haves", must, "min_must_have", minMustHave, "nice_to_haves", nice);
+        return Map.of("must_haves", must, "min_must_have", minMustHave, "nice_to_haves", nice, "model", r.model());
     }
 
-    private Map<String, Object> verifyHistory(
+    @LHTaskMethod(VERIFY_HISTORY)
+    public Map<String, Object> verifyHistory(
             String engine, Map<String, Object> application, Map<String, Object> verification, WorkerContext ctx)
             throws Exception {
         Object experience = ((Map<?, ?>) application.get("resume")).get("experience");
@@ -138,16 +92,18 @@ public class ScreeningDecisionWorker {
                 Map.of("resume_experience", experience, "employment_verification", verification),
                 VERIFY_QUESTIONS);
         ModelResponse.Answer discrepancy = r.get("discrepancy");
-        return r.toResult(
+        return Map.of(
                 "employers_match", r.get("employers_match").noul(),
                 "titles_match", r.get("titles_match").noul(),
                 "dates_match", r.get("dates_match").noul(),
                 "discrepancy", discrepancy.choice(),
-                "discrepancy_confidence", discrepancy.confidence());
+                "discrepancy_confidence", discrepancy.confidence(),
+                "model", r.model());
     }
 
     /** Every earlier answer (and the code-computed composite) goes into the state of the final call. */
-    private Map<String, Object> recommend(
+    @LHTaskMethod(RECOMMEND_NEXT_STEP)
+    public Map<String, Object> recommend(
             String engine, Map<String, Object> role, Map<String, Object> fit, Map<String, Object> requirements,
             Map<String, Object> history, WorkerContext ctx) throws Exception {
         ModelResponse r = models.ask(engine, ctx,
@@ -156,7 +112,6 @@ public class ScreeningDecisionWorker {
                         "screening", Map.of("fit", fit, "requirements", requirements, "verification", history)),
                 NEXT_STEP_QUESTIONS);
         ModelResponse.Answer next = r.get("next_step");
-        return r.toResult("decision", next.choice(), "confidence", next.confidence(),
-                "probabilities", next.probabilities());
+        return Map.of("decision", next.choice(), "confidence", next.confidence(), "model", r.model());
     }
 }

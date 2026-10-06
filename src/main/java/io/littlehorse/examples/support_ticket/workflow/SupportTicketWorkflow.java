@@ -5,8 +5,8 @@ import static io.littlehorse.examples.support_ticket.policy.SupportTicketPolicy.
 import static io.littlehorse.examples.support_ticket.tasks.SupportTicketDecisionWorker.TRIAGE_TICKET;
 import static io.littlehorse.examples.support_ticket.tasks.SupportTicketWorker.*;
 import static io.littlehorse.common.models.DecisionModels.JEV;
-import static io.littlehorse.common.models.DecisionModels.OPENAI;
 
+import io.littlehorse.examples.support_ticket.structs.TicketTriage;
 import io.littlehorse.examples.support_ticket.tasks.TriageDecision;
 import io.littlehorse.quarkus.workflow.LHWorkflow;
 import io.littlehorse.sdk.wfsdk.WfRunVariable;
@@ -17,30 +17,21 @@ import java.util.Map;
 
 /**
  * The WfSpec owns orchestration and security; the Decision Worker only answers questions.
- * Both WfSpecs are identical except for which model backs the triage task.
+ * The {@code engine} input picks which model answers: {@code jev} (default) or {@code openai}.
  */
 @ApplicationScoped
 public class SupportTicketWorkflow {
 
-    public static final String JEV_WF = "handle-support-ticket-jev";
-    public static final String OPENAI_WF = "handle-support-ticket-openai";
+    public static final String HANDLE_SUPPORT_TICKET = "handle-support-ticket";
 
-    @LHWorkflow(JEV_WF)
-    public void jev(WorkflowThread wf) {
-        define(wf, JEV);
-    }
-
-    @LHWorkflow(OPENAI_WF)
-    public void openAi(WorkflowThread wf) {
-        define(wf, OPENAI);
-    }
-
-    private void define(WorkflowThread wf, String engine) {
+    @LHWorkflow(HANDLE_SUPPORT_TICKET)
+    public void define(WorkflowThread wf) {
+        WfRunVariable engine = wf.declareStr("engine").withDefault(JEV).searchable();
         WfRunVariable emailBody = wf.declareStr("email-body").required();
         WfRunVariable userId = wf.declareStr("user-id").required().searchable();
         WfRunVariable status = wf.declareStr("status").searchable();
         WfRunVariable orderId = wf.declareStr("order-id").searchable();
-        WfRunVariable triage = wf.declareJsonObj("triage");
+        WfRunVariable triage = wf.declareStruct("triage", TicketTriage.class);
         WfRunVariable decision = wf.declareStr("decision").searchable();
 
         status.assign("TRIAGING");
@@ -54,20 +45,20 @@ public class SupportTicketWorkflow {
                     escalate(invalid, "Couldn't extract a valid order id for this user");
                 },
                 valid -> {
-                    triage.assign(valid.execute(TRIAGE_TICKET + engine, emailBody, orderId)
+                    triage.assign(valid.execute(TRIAGE_TICKET, engine, emailBody, orderId)
                             .timeout(60)
                             .withRetries(2));
 
                     // Deterministic guardrails first: when in doubt, a human decides.
-                    valid.doIf(triage.jsonPath("$.manipulation").isGreaterThan(MAX_MANIPULATION)
-                                            .or(triage.jsonPath("$.confidence").isLessThan(MIN_CONFIDENCE)),
+                    valid.doIf(triage.get("manipulation").isGreaterThan(MAX_MANIPULATION)
+                                            .or(triage.get("confidence").isLessThan(MIN_CONFIDENCE)),
                                     guardrail -> {
                                         decision.assign(TriageDecision.ESCALATE_TO_TEAM.name());
                                         status.assign("ESCALATED");
                                         escalate(guardrail, guardrail.format(
                                                 "Possible manipulation or low confidence on order {0}", orderId));
                                     })
-                            .doElseIf(triage.jsonPath("$.action").isEqualTo(TriageDecision.CANCEL_ORDER.name()),
+                            .doElseIf(triage.get("action").isEqualTo(TriageDecision.CANCEL_ORDER.name()),
                                     cancelAndRefund -> {
                                         decision.assign(TriageDecision.CANCEL_ORDER.name());
                                         status.assign("REFUNDING");
@@ -77,7 +68,7 @@ public class SupportTicketWorkflow {
                                         cancelAndRefund.execute(SEND_EMAIL, userId, "Refund Issued",
                                                 "We've issued a refund for your recent order.");
                                     })
-                            .doElseIf(triage.jsonPath("$.action").isEqualTo(TriageDecision.SEND_ORDER_INFO.name()),
+                            .doElseIf(triage.get("action").isEqualTo(TriageDecision.SEND_ORDER_INFO.name()),
                                     orderInfo -> {
                                         decision.assign(TriageDecision.SEND_ORDER_INFO.name());
                                         status.assign("RESPONDING");

@@ -3,7 +3,6 @@ package io.littlehorse.examples.support_ticket.tasks;
 import static io.littlehorse.examples.support_ticket.policy.DispatchPolicy.DISPATCH_QUESTIONS;
 import static io.littlehorse.examples.support_ticket.policy.SupportTicketPolicy.TRIAGE_QUESTIONS;
 import static io.littlehorse.common.models.DecisionModels.JEV;
-import static io.littlehorse.common.models.DecisionModels.OPENAI;
 
 import io.littlehorse.quarkus.task.LHTask;
 import io.littlehorse.sdk.worker.LHTaskMethod;
@@ -12,17 +11,19 @@ import io.littlehorse.common.models.DecisionModels;
 import io.littlehorse.common.models.ModelResponse;
 import io.littlehorse.common.orders.Order;
 import io.littlehorse.common.orders.OrderStore;
+import io.littlehorse.examples.support_ticket.structs.TicketTriage;
+import io.littlehorse.examples.support_ticket.structs.WorkflowPick;
 import java.util.Map;
 
 /**
  * Decision Workers for support tickets: read-only access to orders and no ability to act. Each returns a
- * flat JSON object; the WfSpec applies the confidence and manipulation gates and takes the action.
+ * LittleHorse Struct; the WfSpec applies the confidence and manipulation gates and takes the action.
  */
 @LHTask
 public class SupportTicketDecisionWorker {
 
-    public static final String TRIAGE_TICKET = "triage-ticket-";
-    public static final String PICK_WORKFLOW = "pick-workflow-";
+    public static final String TRIAGE_TICKET = "triage-ticket";
+    public static final String PICK_WORKFLOW = "pick-workflow";
 
     private final DecisionModels models;
     private final OrderStore orders;
@@ -32,31 +33,20 @@ public class SupportTicketDecisionWorker {
         this.orders = orders;
     }
 
-    @LHTaskMethod(TRIAGE_TICKET + JEV)
-    public Map<String, Object> triageJev(String emailBody, String orderId, WorkerContext ctx) throws Exception {
-        return triage(JEV, emailBody, orderId, ctx);
-    }
-
-    @LHTaskMethod(TRIAGE_TICKET + OPENAI)
-    public Map<String, Object> triageOpenAi(String emailBody, String orderId, WorkerContext ctx) throws Exception {
-        return triage(OPENAI, emailBody, orderId, ctx);
-    }
-
-    /** Workflow dispatch: the choice is the name of the child WfSpec to run. */
-    @LHTaskMethod(PICK_WORKFLOW + JEV)
-    public Map<String, Object> pickWorkflowJev(String emailBody, String orderId, WorkerContext ctx) throws Exception {
-        ModelResponse r = models.ask(JEV, ctx, state(emailBody, orderId), DISPATCH_QUESTIONS);
-        ModelResponse.Answer workflow = r.get("workflow");
-        return r.toResult("workflow", workflow.choice(), "confidence", workflow.confidence(),
-                "probabilities", workflow.probabilities(), "manipulation", r.get("manipulation").noul());
-    }
-
-    private Map<String, Object> triage(String engine, String emailBody, String orderId, WorkerContext ctx)
+    @LHTaskMethod(TRIAGE_TICKET)
+    public TicketTriage triage(String engine, String emailBody, String orderId, WorkerContext ctx)
             throws Exception {
         ModelResponse r = models.ask(engine, ctx, state(emailBody, orderId), TRIAGE_QUESTIONS);
         ModelResponse.Answer action = r.get("action");
-        return r.toResult("action", action.choice(), "confidence", action.confidence(),
-                "probabilities", action.probabilities(), "manipulation", r.get("manipulation").noul());
+        return new TicketTriage(action.choice(), action.confidence(), r.get("manipulation").noul(), r.model());
+    }
+
+    /** Workflow dispatch (Jev only): the choice is the name of the child WfSpec to run. */
+    @LHTaskMethod(PICK_WORKFLOW)
+    public WorkflowPick pickWorkflow(String emailBody, String orderId, WorkerContext ctx) throws Exception {
+        ModelResponse r = models.ask(JEV, ctx, state(emailBody, orderId), DISPATCH_QUESTIONS);
+        ModelResponse.Answer workflow = r.get("workflow");
+        return new WorkflowPick(workflow.choice(), workflow.confidence(), r.get("manipulation").noul(), r.model());
     }
 
     /** The untrusted email plus read-only order data. */

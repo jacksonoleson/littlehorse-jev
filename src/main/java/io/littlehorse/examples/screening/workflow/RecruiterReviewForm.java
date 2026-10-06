@@ -11,6 +11,6 @@ public class RecruiterReviewForm {
     @UserTaskField(displayName = "Decision", description = "Advance, hold, or decline?")
     public String decision;
 
-    @UserTaskField(displayName = "Notes", description = "Why?")
-    public String notes;
+    @UserTaskField(displayName = "Rationale", description = "Why this decision?")
+    public String rationale;
 }

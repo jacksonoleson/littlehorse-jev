@@ -19,10 +19,13 @@ public class JevModel {
     }
 
     public ModelResponse ask(Object state, Map<String, SystemOne.Question> questions) {
+        
         SystemOne.Response r = client.systemOne(new SystemOne.Request(state, model, questions));
         Map<String, ModelResponse.Answer> answers = new LinkedHashMap<>();
+        
         r.answers().forEach((id, a) -> answers.put(id, new ModelResponse.Answer(
                 a.choice(), a.noul(), a.score(), a.confidence(), a.probabilities())));
+        
         return new ModelResponse(r.model(), answers);
     }
 }

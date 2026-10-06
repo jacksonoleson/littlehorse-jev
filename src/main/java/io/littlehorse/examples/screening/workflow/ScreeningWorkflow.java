@@ -6,7 +6,6 @@ import static io.littlehorse.examples.screening.tasks.ScreeningDecisionWorker.*;
 import static io.littlehorse.examples.screening.tasks.ScreeningWorker.*;
 import static io.littlehorse.examples.screening.workflow.RecruiterReviewForm.RECRUITER_REVIEW;
 import static io.littlehorse.common.models.DecisionModels.JEV;
-import static io.littlehorse.common.models.DecisionModels.OPENAI;
 
 import io.littlehorse.quarkus.workflow.LHWorkflow;
 import io.littlehorse.sdk.wfsdk.TaskNodeOutput;
@@ -19,24 +18,16 @@ import jakarta.enterprise.context.ApplicationScoped;
  * Blind resume screening. Up to four model calls, each asking many questions in parallel; the
  * WfSpec branches on their typed answers and feeds them into later calls. No screening call declines a
  * candidate: every decline goes through the recruiter-review user task, which a Jev "recruiter" completes.
+ * The {@code engine} input picks which model screens: {@code jev} (default) or {@code openai}.
  */
 @ApplicationScoped
 public class ScreeningWorkflow {
 
-    public static final String JEV_WF = "screen-candidate-jev";
-    public static final String OPENAI_WF = "screen-candidate-openai";
+    public static final String SCREEN_CANDIDATE = "screen-candidate";
 
-    @LHWorkflow(JEV_WF)
-    public void jev(WorkflowThread wf) {
-        define(wf, JEV);
-    }
-
-    @LHWorkflow(OPENAI_WF)
-    public void openAi(WorkflowThread wf) {
-        define(wf, OPENAI);
-    }
-
-    private void define(WorkflowThread wf, String engine) {
+    @LHWorkflow(SCREEN_CANDIDATE)
+    public void define(WorkflowThread wf) {
+        WfRunVariable engine = wf.declareStr("engine").withDefault(JEV).searchable();
         WfRunVariable applicationId = wf.declareStr("application-id").required().searchable();
         WfRunVariable outcome = wf.declareStr("outcome").searchable();
         WfRunVariable application = wf.declareJsonObj("application");
@@ -53,7 +44,7 @@ public class ScreeningWorkflow {
         application.assign(wf.execute(FETCH_APPLICATION, applicationId));
 
         // Call 1 (intent routing + speculative fan-out): track, seniority, spam, remote, 5 skill scores.
-        triage.assign(decide(wf.execute(TRIAGE_APPLICATION + engine, application)));
+        triage.assign(decide(wf.execute(TRIAGE_APPLICATION, engine, application)));
 
         wf.doIf(triage.jsonPath("$.spam").isGreaterThan(SPAM), spam -> {
                     outcome.assign("CLOSED_SPAM");
@@ -69,7 +60,7 @@ public class ScreeningWorkflow {
                     fit.assign(roleFits.execute(COMPUTE_FIT_SCORE, triage, role));
 
                     // Call 2: one Noul per requirement of the chosen role.
-                    requirements.assign(decide(roleFits.execute(CHECK_REQUIREMENTS + engine, application, role)));
+                    requirements.assign(decide(roleFits.execute(CHECK_REQUIREMENTS, engine, application, role)));
 
                     roleFits.doIf(fit.jsonPath("$.remote_conflict").isEqualTo(true),
                                     remoteConflict -> recruiter(remoteConflict, outcome, review,
@@ -88,11 +79,11 @@ public class ScreeningWorkflow {
 
                                 // Call 3: does the resume match what employers have on record?
                                 history.assign(decide(
-                                        strongFit.execute(VERIFY_HISTORY + engine, application, verification)));
+                                        strongFit.execute(VERIFY_HISTORY, engine, application, verification)));
 
                                 // Call 4: earlier answers and the composite score become this call's state.
                                 recommendation.assign(decide(strongFit.execute(
-                                        RECOMMEND_NEXT_STEP + engine, role, fit, requirements, history)));
+                                        RECOMMEND_NEXT_STEP, engine, role, fit, requirements, history)));
 
                                 route(strongFit, recommendation, outcome, review, applicationId);
                             });

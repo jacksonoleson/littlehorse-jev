@@ -60,14 +60,14 @@ public class RecruiterDecisionWorker {
 
         ModelResponse r = models.ask(JEV, ctx, state, RECRUITER_REVIEW_QUESTIONS);
         ModelResponse.Answer decision = r.get("decision");
-        String notes = "%s chose %s (confidence %.2f, probabilities %s)"
+        String rationale = "%s chose %s (confidence %.2f, probabilities %s)"
                 .formatted(r.model(), decision.choice(), decision.confidence(), decision.probabilities());
 
         lh.completeUserTaskRun(CompleteUserTaskRunRequest.newBuilder()
                 .setUserTaskRunId(taskId)
                 .setUserId(REVIEWER)
                 .putResults("decision", LHLibUtil.objToVarVal(decision.choice()))
-                .putResults("notes", LHLibUtil.objToVarVal(notes))
+                .putResults("rationale", LHLibUtil.objToVarVal(rationale))
                 .build());
         return Map.of("reviewer", REVIEWER, "decision", decision.choice(), "confidence", decision.confidence());
     }

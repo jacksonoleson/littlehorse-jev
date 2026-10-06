@@ -4,8 +4,8 @@ import static io.littlehorse.examples.support_ticket.policy.SupportTicketPolicy.
 import static io.littlehorse.examples.support_ticket.policy.SupportTicketPolicy.MIN_CONFIDENCE;
 import static io.littlehorse.examples.support_ticket.tasks.SupportTicketDecisionWorker.PICK_WORKFLOW;
 import static io.littlehorse.examples.support_ticket.tasks.SupportTicketWorker.*;
-import static io.littlehorse.common.models.DecisionModels.JEV;
 
+import io.littlehorse.examples.support_ticket.structs.WorkflowPick;
 import io.littlehorse.quarkus.workflow.LHWorkflow;
 import io.littlehorse.sdk.wfsdk.SpawnedChildWf;
 import io.littlehorse.sdk.wfsdk.WfRunVariable;
@@ -35,7 +35,7 @@ public class DispatchWorkflows {
         WfRunVariable status = wf.declareStr("status").searchable();
         WfRunVariable orderId = wf.declareStr("order-id").searchable();
         WfRunVariable childWf = wf.declareStr("child-wf").searchable();
-        WfRunVariable pick = wf.declareJsonObj("workflow-pick");
+        WfRunVariable pick = wf.declareStruct("workflow-pick", WorkflowPick.class);
         WfRunVariable resolution = wf.declareStr("resolution");
 
         status.assign("TRIAGING");
@@ -46,13 +46,13 @@ public class DispatchWorkflows {
                 wf.execute(VALIDATE_ORDER_AND_USER, userId, orderId).isEqualTo(false),
                 invalid -> childWf.assign(ESCALATE_TO_HELPDESK),
                 valid -> {
-                    pick.assign(valid.execute(PICK_WORKFLOW + JEV, emailBody, orderId).timeout(60).withRetries(2));
+                    pick.assign(valid.execute(PICK_WORKFLOW, emailBody, orderId).timeout(60).withRetries(2));
                     // A Choice answer is always a catalog key, so the child is always on the allowlist.
                     valid.doIfElse(
-                            pick.jsonPath("$.manipulation").isGreaterThan(MAX_MANIPULATION)
-                                    .or(pick.jsonPath("$.confidence").isLessThan(MIN_CONFIDENCE)),
+                            pick.get("manipulation").isGreaterThan(MAX_MANIPULATION)
+                                    .or(pick.get("confidence").isLessThan(MIN_CONFIDENCE)),
                             guardrail -> childWf.assign(ESCALATE_TO_HELPDESK),
-                            confident -> childWf.assign(pick.jsonPath("$.workflow")));
+                            confident -> childWf.assign(pick.get("workflow")));
                 });
 
         status.assign("DISPATCHED");
